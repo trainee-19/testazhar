@@ -7,6 +7,7 @@
 > **Prerequisites**
 > - M6 SKILL.md pattern completed — you know how to author a skill file
 > - M7 eval gate in place — `promptfooconfig.yaml` and `eval.yml` committed
+> - The repo's sample pre-PR workflow `.github/workflows/pre_pr_eval.yml` is relevant as a reference for how linting, tests, evals, and security checks fit together
 > - RAGAS and promptfoo installed (from M7)
 > - PostgreSQL available locally or via Docker (Part C)
 >
@@ -25,7 +26,7 @@ RAG faithfulness  ≥ 0.85   (measured by RAGAS)   → below threshold = PR bloc
 Text2SQL correctness ≥ 90%  (5 NL → SQL tests)    → below threshold = iterate before merge
 ```
 
-These are **hard gates**, not targets. The GitHub Actions pipeline enforces them automatically.
+These are **hard gates**, not targets. The GitHub Actions pipeline enforces them automatically. The repo sample workflow [`.github/workflows/pre_pr_eval.yml`](.github/workflows/pre_pr_eval.yml) is a good reference for how these checks are staged in a real PR pipeline.
 
 ---
 

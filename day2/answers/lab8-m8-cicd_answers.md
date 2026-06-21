@@ -4,6 +4,8 @@
 
 The baseline output should be treated as untrusted because it is not grounded in repo context.
 
+The repo sample workflow [`.github/workflows/pre_pr_eval.yml`](.github/workflows/pre_pr_eval.yml) is relevant here because it shows the broader PR pipeline pattern: lint → tests → eval gate → security checks. That makes it a helpful reference when you are wiring your RAG/Text2SQL checks into CI.
+
 Example answers:
 
 ```text
@@ -49,3 +51,4 @@ If blocked, you should iterate on the search logic before continuing.
 - [x] KB search module and knowledge base created
 - [x] RAGAS faithfulness eval run and reviewed
 - [x] CI gate for the RAG workflow understood
+- [x] The sample pipeline file [`.github/workflows/pre_pr_eval.yml`](.github/workflows/pre_pr_eval.yml) is used as a reference for how CI gates are staged
