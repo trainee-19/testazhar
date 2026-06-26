@@ -10,6 +10,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, RedirectResponse
 import os
 from pathlib import Path
+from src.extensions.kb_extension import rag_search
+from src.sql.text2sql import run_text2sql
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -89,22 +91,7 @@ def classify_query(question: str) -> str:
     return "unknown"
 
 
-def rag_search(question: str) -> dict[str, object]:
-    """Return a simple RAG-style response for qualitative questions."""
-    return {
-        "answer": f"I can help explain the activity context for: {question}",
-        "source": "rag",
-        "confidence": 0.9,
-    }
 
-
-def run_text2sql(question: str) -> dict[str, object]:
-    """Return a simple text-to-SQL-style response for quantitative questions."""
-    return {
-        "answer": f"I can help turn this into a query for: {question}",
-        "source": "text2sql",
-        "confidence": 0.9,
-    }
 
 
 @app.post("/api/ask")
@@ -152,23 +139,6 @@ async def ask(request: Request) -> JSONResponse:
         "source": "direct",
         "confidence": 1.0,
     })
-    
-# Stubs — will be replaced with real implementations in Task B
-def rag_search(question: str) -> dict:
-    """Placeholder: returns stub RAG answer."""
-    return {
-        "answer": f"[RAG stub] Answer about: {question}",
-        "source": "rag",
-        "confidence": 0.0
-    }
-
-def run_text2sql(question: str) -> dict:
-    """Placeholder: returns stub Text2SQL answer."""
-    return {
-        "answer": f"[Text2SQL stub] Data answer for: {question}",
-        "source": "text2sql",
-        "confidence": 0.0
-    }
 
 
 

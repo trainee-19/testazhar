@@ -420,7 +420,7 @@ After generating, test manually:
 ```bash
 python -c "from src.extensions.kb_extension import rag_search; print(rag_search('Tell me about Chess Club'))"
 ```
-
+![alt text](image-1.png)
 ```
 Returns a dict with answer, source, confidence?   □ Yes   □ No — investigate
 ```
