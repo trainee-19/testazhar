@@ -9,9 +9,15 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse, RedirectResponse
 import os
+import sys
 from pathlib import Path
-from src.extensions.kb_extension import rag_search
-from src.sql.text2sql import run_text2sql
+
+try:
+    from src.extensions.kb_extension import rag_search
+    from src.sql.text2sql import run_text2sql
+except ModuleNotFoundError:
+    from extensions.kb_extension import rag_search
+    from sql.text2sql import run_text2sql
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -47,6 +53,10 @@ activities = {
 @app.get("/")
 def root():
     return RedirectResponse(url="/static/index.html")
+
+@app.get("/ask.html")
+def ask_page():
+    return RedirectResponse(url="/static/ask.html")
 
 # ============================================================
 # UAT-LOCKED: This route has passed UAT. DO NOT MODIFY.

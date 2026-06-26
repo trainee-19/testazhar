@@ -557,7 +557,10 @@ Test manually:
 ```bash
 # Start the Flask app
 python src/app.py
-
+uvicorn src.app:app --reload --host 127.0.0.1 --port 5000
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
 # In browser: open http://localhost:5000/ask.html
 # Test: "Tell me about Chess Club" (should use RAG)
 # Test: "How many students in Swimming?" (should use Text2SQL)
