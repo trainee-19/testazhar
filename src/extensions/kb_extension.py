@@ -45,7 +45,6 @@ def rag_search(question: str) -> Dict[str, Any]:
         for activity_name, activity_data in activities.items():
             name_lower = activity_name.lower()
             desc_lower = activity_data.get("description", "").lower()
-            combined = f"{name_lower} {desc_lower}".lower()
 
             score = 0.0
             for word in normalized_query.split():
@@ -125,7 +124,7 @@ def rag_search(question: str) -> Dict[str, Any]:
         return _fallback_response()
 
     index_path = _get_index_path()
-    
+
     # Try FAISS first if available
     if index_path.exists():
         try:
@@ -151,17 +150,29 @@ def rag_search(question: str) -> Dict[str, Any]:
             if not chunks:
                 return _search_activities(question)
 
-            best_distance = float(distances[0][0]) if distances.size else float("inf")
+            best_distance = (
+                float(distances[0][0]) if distances.size else float("inf")
+            )
             metric = getattr(index, "metric_type", None)
-            if metric is not None and hasattr(faiss, "METRIC_INNER_PRODUCT") and metric == faiss.METRIC_INNER_PRODUCT:
+            if (
+                metric is not None
+                and hasattr(faiss, "METRIC_INNER_PRODUCT")
+                and metric == faiss.METRIC_INNER_PRODUCT
+            ):
                 confidence = max(0.0, min(1.0, best_distance))
             else:
-                confidence = 1.0 / (1.0 + best_distance) if best_distance >= 0.0 else 0.0
+                confidence = (
+                    1.0 / (1.0 + best_distance)
+                    if best_distance >= 0.0
+                    else 0.0
+                )
 
             if confidence < 0.5:
                 return _search_activities(question)
 
-            answer = "\n\n".join(chunk.strip() for chunk in chunks if chunk and chunk.strip())
+            answer = "\n\n".join(
+                chunk.strip() for chunk in chunks if chunk and chunk.strip()
+            )
             if not answer:
                 return _search_activities(question)
 
@@ -172,6 +183,6 @@ def rag_search(question: str) -> Dict[str, Any]:
             }
         except Exception:
             return _search_activities(question)
-    
+
     # Fallback: search activities when FAISS unavailable
     return _search_activities(question)

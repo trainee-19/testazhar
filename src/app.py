@@ -18,13 +18,19 @@ except ModuleNotFoundError:
     from extensions.kb_extension import rag_search
     from sql.text2sql import run_text2sql
 
-app = FastAPI(title="Mergington High School API",
-              description="API for viewing and signing up for extracurricular activities")
+app = FastAPI(
+    title="Mergington High School API",
+    description=(
+        "API for viewing and signing up for extracurricular activities"
+    ),
+)
 
 # Mount the static files directory
-current_dir = Path(__file__).parent
-app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
-          "static")), name="static")
+app.mount(
+    "/static",
+    StaticFiles(directory=os.path.join(Path(__file__).parent, "static")),
+    name="static",
+)
 
 # In-memory activity database
 activities = {
@@ -93,9 +99,19 @@ def classify_query(question: str) -> str:
         return "unknown"
 
     normalized = question.strip().lower()
-    if any(keyword in normalized for keyword in ("what", "describe", "tell me about", "how does", "explain")):
+    rag_keywords = ("what", "describe", "tell me about", "how does", "explain")
+    if any(keyword in normalized for keyword in rag_keywords):
         return "rag"
-    if any(keyword in normalized for keyword in ("how many", "which", "list", "count", "total", "how much", "how full")):
+    sql_keywords = (
+        "how many",
+        "which",
+        "list",
+        "count",
+        "total",
+        "how much",
+        "how full",
+    )
+    if any(keyword in normalized for keyword in sql_keywords):
         return "text2sql"
     return "unknown"
 
@@ -109,45 +125,66 @@ async def ask(request: Request) -> JSONResponse:
     try:
         payload = await request.json()
     except Exception:
-        return JSONResponse(status_code=400, content={
-            "answer": "Please provide a non-empty question.",
-            "source": "direct",
-            "confidence": 1.0,
-        })
+        return JSONResponse(
+            status_code=400,
+            content={
+                "answer": "Please provide a non-empty question.",
+                "source": "direct",
+                "confidence": 1.0,
+            },
+        )
 
     if not isinstance(payload, dict):
-        return JSONResponse(status_code=400, content={
-            "answer": "Please provide a non-empty question.",
-            "source": "direct",
-            "confidence": 1.0,
-        })
+        return JSONResponse(
+            status_code=400,
+            content={
+                "answer": "Please provide a non-empty question.",
+                "source": "direct",
+                "confidence": 1.0,
+            },
+        )
 
     question = payload.get("question")
     if not isinstance(question, str) or not question.strip():
-        return JSONResponse(status_code=400, content={
-            "answer": "Please provide a non-empty question.",
-            "source": "direct",
-            "confidence": 1.0,
-        })
+        return JSONResponse(
+            status_code=400,
+            content={
+                "answer": "Please provide a non-empty question.",
+                "source": "direct",
+                "confidence": 1.0,
+            },
+        )
 
     route = classify_query(question)
     try:
         if route == "rag":
-            return JSONResponse(status_code=200, content=rag_search(question))
+            result = rag_search(question)
+            return JSONResponse(status_code=200, content=result)
         if route == "text2sql":
-            return JSONResponse(status_code=200, content=run_text2sql(question))
+            result = run_text2sql(question)
+            return JSONResponse(status_code=200, content=result)
     except Exception:
-        return JSONResponse(status_code=500, content={
-            "answer": "I couldn't process that question right now.",
-            "source": "direct",
-            "confidence": 0.0,
-        })
+        return JSONResponse(
+            status_code=500,
+            content={
+                "answer": "I couldn't process that question right now.",
+                "source": "direct",
+                "confidence": 0.0,
+            },
+        )
 
-    return JSONResponse(status_code=200, content={
-        "answer": "I can only answer questions about activities. Try asking what an activity is about, or how many students have joined.",
-        "source": "direct",
-        "confidence": 1.0,
-    })
+    return JSONResponse(
+        status_code=200,
+        content={
+            "answer": (
+                "I can only answer questions about activities. "
+                "Try asking what an activity is about, "
+                "or how many students have joined."
+            ),
+            "source": "direct",
+            "confidence": 1.0,
+        },
+    )
 
 
 
