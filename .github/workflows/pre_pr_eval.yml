@@ -28,8 +28,8 @@ jobs:
  
       - name: "Step 3 — Unit tests (UAT regression check)"
         run: |
-          pip install -r requirements.txt
-          pytest src/tests/test_app.py -v --tb=short
+          pip install -r requirements.txt pytest
+          python3 -m pytest src/tests/test_app.py -v --tb=short
           echo "✅ Step 3: All existing tests pass"
         # Failure here = UAT regression. PR blocked.
  
