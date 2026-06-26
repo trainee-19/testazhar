@@ -1,5 +1,5 @@
 # Mergington High School — Extracurricular Activities API
-
+- PR Iylin
 A lightweight FastAPI application that lets students at Mergington High School browse and sign up for extracurricular activities through a simple web interface.
 
 ## About
