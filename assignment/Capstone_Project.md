@@ -745,6 +745,7 @@ Step 5 — Security scan (GHAS):      □ Passed   □ Failed
 Step 6 — Auto-docs:                 □ Passed   □ Failed
 Step 7 — PR opens (if all pass):    □ Yes       □ Not yet
 
+![alt text](image-6.png)
 All 6 checks passed?   □ Yes — PR is ready for review
                         □ No — fix the failing step first
 ```
