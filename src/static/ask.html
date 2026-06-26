@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ask About Activities</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fafafa;
+      color: #222;
+    }
+    .container {
+      max-width: 640px;
+      margin: 3rem auto;
+      padding: 1.5rem;
+      background: #ffffff;
+      border: 1px solid #e3e3e3;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.05);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.75rem;
+      color: #111;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1rem;
+      padding: 0.9rem 1.4rem;
+      font-size: 1rem;
+      color: #fff;
+      background-color: #1f6feb;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #9bb7ec;
+      cursor: not-allowed;
+    }
+    .result {
+      margin-top: 1.75rem;
+      padding: 1.25rem;
+      border: 1px solid #e1e1e1;
+      border-radius: 10px;
+      background: #fbfbfb;
+      min-height: 6rem;
+    }
+    .badge {
+      display: inline-block;
+      margin-bottom: 0.75rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      color: #fff;
+    }
+    .badge.rag { background: #10a37f; }
+    .badge.text2sql { background: #7a5af8; }
+    .badge.direct { background: #f97316; }
+    .confidence {
+      margin-top: 0.75rem;
+      font-size: 0.95rem;
+      color: #555;
+    }
+    .error {
+      color: #b91c1c;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ask about our activities</h1>
+    <label for="question-input">Question</label>
+    <input id="question-input" type="text" placeholder="Ask about Chess Club, programming, or class capacity" />
+    <button id="ask-button" type="button">Submit</button>
+
+    <div id="result" class="result" aria-live="polite">
+      <div id="status"></div>
+      <div id="answer"></div>
+    </div>
+  </div>
+
+  <script>
+    const askButton = document.getElementById('ask-button');
+    const questionInput = document.getElementById('question-input');
+    const statusEl = document.getElementById('status');
+    const answerEl = document.getElementById('answer');
+
+    const sourceLabel = {
+      rag: 'Answered from knowledge base',
+      text2sql: 'Answered from database',
+      direct: 'Direct answer'
+    };
+
+    function setLoading(isLoading) {
+      askButton.disabled = isLoading;
+      askButton.textContent = isLoading ? 'Asking…' : 'Submit';
+    }
+
+    function renderResponse(payload) {
+      if (!payload || typeof payload !== 'object') {
+        statusEl.innerHTML = '<span class="error">Unexpected response from the server.</span>';
+        answerEl.textContent = '';
+        return;
+      }
+
+      const source = payload.source || 'direct';
+      const confidence = Number(payload.confidence || 0);
+      const answer = payload.answer || 'No answer returned.';
+
+      const badge = document.createElement('span');
+      badge.className = `badge ${source}`;
+      badge.textContent = sourceLabel[source] || sourceLabel.direct;
+
+      statusEl.innerHTML = '';
+      statusEl.appendChild(badge);
+
+      if (confidence > 0.5) {
+        const confidenceEl = document.createElement('div');
+        confidenceEl.className = 'confidence';
+        confidenceEl.textContent = `Confidence: ${Math.round(confidence * 100)}%`;
+        statusEl.appendChild(confidenceEl);
+      }
+
+      answerEl.textContent = answer;
+    }
+
+    function renderError(message) {
+      statusEl.innerHTML = `<span class="error">${message}</span>`;
+      answerEl.textContent = '';
+    }
+
+    async function askQuestion() {
+      const question = questionInput.value.trim();
+      if (!question) {
+        renderError('Please enter a question before submitting.');
+        return;
+      }
+
+      setLoading(true);
+      statusEl.innerHTML = '';
+      answerEl.textContent = '';
+
+      try {
+        const response = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          renderError(`Server error: ${response.status} ${errorText}`);
+          return;
+        }
+
+        const data = await response.json();
+        renderResponse(data);
+      } catch (err) {
+        renderError('Network error. Please check your connection and try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    askButton.addEventListener('click', askQuestion);
+    questionInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        askQuestion();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -342,7 +342,7 @@ ask() route present?         □ Yes         □ No — re-prompt
 ```bash
 pytest src/tests/test_app.py -v
 ```
-
+![alt text](image.png)
 ```
 All 8 original tests pass?   □ Yes — commit   □ No — investigate
 ```
@@ -420,7 +420,7 @@ After generating, test manually:
 ```bash
 python -c "from src.extensions.kb_extension import rag_search; print(rag_search('Tell me about Chess Club'))"
 ```
-
+![alt text](image-1.png)
 ```
 Returns a dict with answer, source, confidence?   □ Yes   □ No — investigate
 ```
@@ -557,7 +557,10 @@ Test manually:
 ```bash
 # Start the Flask app
 python src/app.py
-
+uvicorn src.app:app --reload --host 127.0.0.1 --port 5000
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
 # In browser: open http://localhost:5000/ask.html
 # Test: "Tell me about Chess Club" (should use RAG)
 # Test: "How many students in Swimming?" (should use Text2SQL)
@@ -700,7 +703,7 @@ git push
 ```bash
 npx promptfoo eval
 ```
-
+![alt text](image-5.png)
 ```
 Total assertions: ______
 Passed: ______
@@ -742,6 +745,7 @@ Step 5 — Security scan (GHAS):      □ Passed   □ Failed
 Step 6 — Auto-docs:                 □ Passed   □ Failed
 Step 7 — PR opens (if all pass):    □ Yes       □ Not yet
 
+![alt text](image-6.png)
 All 6 checks passed?   □ Yes — PR is ready for review
                         □ No — fix the failing step first
 ```
