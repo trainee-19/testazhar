@@ -1,13 +1,14 @@
 # promptfooconfig.yml
 prompts:
   - |
-
     Add a new FastAPI route function called get_activity to src/app.py.
-    Return the activity details as a JSON object (200) or raise HTTPException(status_code=404, detail="Activity not found").
-    Place the new route below signup_for_activity(). Use existing imports only; do not add new imports. Output only the new route + function.
+    Return the activity details as a JSON object (200) or raise
+    HTTPException(status_code=404, detail="Activity not found").
+    Place the new route below signup_for_activity(). Use existing imports only;
+    do not add new imports. Output only the new route + function.
 
 providers:
-  - id: github:gpt-4o-mini
+  - file://provider.js
 
 tests:
 
@@ -28,9 +29,60 @@ tests:
   - description: "Output uses jsonify"
     assert:
       - type: contains
-        value: "jsonify"
+        value: "JSONResponse"
 
   - description: "Output uses 404 status for not found"
     assert:
       - type: contains
         value: "status_code=404"
+
+
+  - description: "Capstone: ask endpoint has correct function name"
+    assert:
+      - type: contains
+        value: "def ask"
+
+  - description: "Capstone: ask endpoint uses correct route"
+    assert:
+      - type: contains
+        value: "/api/ask"
+
+  - description: "Capstone: endpoint accepts POST method"
+    assert:
+      - type: contains
+        value: "POST"
+
+  - description: "Capstone: classifier function present"
+    assert:
+      - type: contains
+        value: "classify_query"
+
+  - description: "Capstone: RAG routing for qualitative queries"
+    assert:
+      - type: contains
+        value: "rag"
+
+  - description: "Capstone: Text2SQL routing for quantitative queries"
+    assert:
+      - type: contains
+        value: "text2sql"
+
+  - description: "Capstone: does NOT modify get_activities — UAT-locked"
+    assert:
+      - type: not-contains
+        value: "def get_activities"
+
+  - description: "Capstone: does NOT modify signup — UAT-locked"
+    assert:
+      - type: not-contains
+        value: "def signup"
+
+  - description: "Capstone: returns source field in response"
+    assert:
+      - type: contains
+        value: '"source"'
+
+  - description: "Capstone: handles 400 for missing question field"
+    assert:
+      - type: contains
+        value: "400"

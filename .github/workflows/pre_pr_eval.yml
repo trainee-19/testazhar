@@ -1,0 +1,78 @@
+name: Pre-PR Pipeline
+ 
+on: [pull_request]
+
+permissions:
+  statuses: write
+  contents: read
+ 
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: "Step 1 — Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+ 
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+ 
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+ 
+      - name: "Step 2 — Linter (Ruff)"
+        run: |
+          pip install ruff
+          ruff check src/app.py src/tests/test_app.py
+          echo "✅ Step 2: Linter passed"
+ 
+      - name: "Step 3 — Unit tests (UAT regression check)"
+        run: |
+          pip install -r requirements.txt pytest
+          python3 -m pytest src/tests/test_app.py -v --tb=short
+          echo "✅ Step 3: All existing tests pass"
+        # Failure here = UAT regression. PR blocked.
+ 
+      - name: "Step 4 — Eval gate (≥ 80% pass rate)"
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          npm install -g promptfoo
+          promptfoo eval --output results.json
+          python3 -c "
+          import json, sys
+          with open('results.json') as f:
+              d = json.load(f)
+          s = d['results']['stats']
+          total = s['successes'] + s['failures'] + s['errors']
+          rate = s['successes'] / total * 100 if total > 0 else 0
+          print(f'Eval pass rate: {rate:.1f}%')
+          if rate < 80:
+              print('BLOCKED: Eval pass rate below 80%')
+              sys.exit(1)
+          print('✅ Step 4: Eval gate passed')
+          "
+ 
+      - name: "Step 5 — Security scan"
+        uses: super-linter/super-linter@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_PYTHON_FLAKE8: true
+          DEFAULT_BRANCH: main
+          LINTER_RULES_PATH: /
+          PYTHON_FLAKE8_CONFIG_FILE: .flake8
+ 
+      - name: "Step 6 & 7 — Pipeline summary (PR may open)"
+        if: success()
+        run: |
+          echo "════════════════════════════════════════════"
+          echo "✅ ALL 6 CHECKS PASSED"
+          echo "Step 7: PR draft may now be opened."
+          echo "Include AI attribution in PR description."
+          echo "════════════════════════════════════════════"

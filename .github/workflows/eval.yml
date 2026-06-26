@@ -1,12 +1,23 @@
 name: Copilot Eval Gate
 
-on: [pull_request]
+on:
+  pull_request:
+
+permissions:
+  statuses: write
+  contents: read
+  models: read
 
 jobs:
   eval:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
       - name: Install promptfoo
         run: npm install -g promptfoo
@@ -21,17 +32,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: promptfoo eval --output results.json
-
-      - name: Check pass rate
-        run: |
-          PASS=$(python3 -c "
-          import json
-          with open('results.json') as f:
-              d = json.load(f)
-          s = d['results']['stats']
-          rate = s['successes'] / s['total'] * 100
-          print(f'{rate:.1f}')
-          ")
-          echo "Eval pass rate: $PASS%"
-          python3 -c "exit(0 if float('$PASS') >= 80 else 1)" || \
-            (echo "BLOCKED: Pass rate $PASS% is below 80% threshold." && exit 1)
