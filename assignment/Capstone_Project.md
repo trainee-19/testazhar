@@ -968,45 +968,33 @@ Every team documents one incident from the capstone — something that went wron
   Team: _______________________   Date: ___________
 ══════════════════════════════════════════════════════════════════
 
-Incident title:
-_______________________________________________________________
+Incident title - What happened:
+A prompt caused Copilot to modify the pre-PR workflow and app formatting in a way that introduced lint/formatting issues, and the change nearly broke the PR gate.
 
-What happened:
-[Describe: which prompt, which file, what Copilot did or nearly did]
-
-_______________________________________________________________
-_______________________________________________________________
-_______________________________________________________________
-
-Which gate caught it (or would have caught it)?
-□ AI Scope Statement — developer noticed during scope review
-□ copilot-instructions.md — Copilot refused or flagged
-□ git diff review — unexpected file appeared
-□ Coverage delta gate — test count dropped
-□ SKILL.md constraint — inherited by invocation
-□ Eval gate (promptfoo not-contains assertion fired)
-□ Unit tests — existing test failed
-□ Security scan (GHAS) — flagged a pattern
-□ Human code review — reviewer spotted it
-□ It was NOT caught — this is a gap
+Which gate caught it?
+[ ] AI Scope Statement — developer noticed during scope review
+[ ] copilot-instructions.md — Copilot flagged
+[ ] git diff review — unexpected file appeared
+[ ] Unit tests — existing test failed
+[ ] Eval gate (not-contains assertion fired)
+[ ] Security scan (GHAS flagged a pattern)
+[ ] Human code review — spotted in diff
+[x] It was NOT caught — this is a gap
 
 Root cause:
-□ Vague prompt (missing scope or constraint)
-□ copilot-instructions.md not updated for new scope
-□ Prompt used a red-flag word (refactor/improve/clean)
-□ Agent plan not reviewed before approving
-□ Eval assertion was missing for this case
-□ Other: _______________________________________________
+[x] Vague prompt
+[ ] NEVER_MODIFY list missing
+[ ] Other: ______
 
-Prevention — one change that would prevent this pattern:
-Gate: ___________________   Configuration: ___________________
+Prevention — what one change prevents this pattern:
+Use a tighter prompt that explicitly says “do not change workflow files or linting-related files unless asked,” and require a short checklist before editing any production or CI files.
 
 SKILL.md update required?
-□ No   □ Yes — Add to CONSTRAINTS: ___________________________
+[x] No
 
 Who else should know about this?
-Teams at risk: ________________________________________________
-Action: Share in CoP channel by: ______________________________
+Teams at risk: _____None___________________________________________
+Action: Share in CoP channel by: ________________Iylin______________
 ══════════════════════════════════════════════════════════════════
 ```
 
@@ -1017,31 +1005,36 @@ Action: Share in CoP channel by: ______________________________
 Complete independently before leaving. 5 minutes.
 
 ```
-1. The gate that caught the most valuable issue during my capstone work:
+1. Gate that caught the most valuable issue
 
-   Gate: _______________________
-   What it caught: _____________________________________________
+Gate: Security scan (Flake8 via super-linter)
 
-2. The prompt mistake I made that I will not make again:
+What it caught: PEP8 violations in src/app.py and src/sql/text2sql.py — E302, E303, W391, E501 — that would've shipped unreviewed into the branch
 
-   _______________________________________________________________
-   _______________________________________________________________
 
-3. The protection layer I will add to my real project first thing Monday:
+2. Prompt mistake I made that I will not make again
 
-   _______________________________________________________________
+Only you know this one — think about any prompt you gave Copilot that produced wrong, hallucinated, or off-target code. What did you assume it understood that it didn't?
 
-4. The most surprising thing Copilot did during this capstone (good or bad):
 
-   _______________________________________________________________
-   _______________________________________________________________
+3. Protection layer I'll add to my real project first on Monday
 
-5. Write the four principles from memory:
+Based on your work today, the strongest candidate is: permissions: statuses: write + fetch-depth: 0 in the workflow — the two missing configs that silently broke your pipeline
 
-   1. AI ___________________; humans are ___________________.
-   2. ___________________ but ___________________.
-   3. ___________________ before you ___________________.
-   4. ___________________ it ___________________.
+
+4. Most surprising thing Copilot did
+
+Again, only you saw this firsthand — good or bad moment during the session?
+
+
+5. Four principles from memory
+
+These are from your capstone training material — likely something like:
+
+AI assists; humans are accountable
+Trust but verify
+Test before you ship
+Own it always
 ```
 
 ---
@@ -1062,6 +1055,7 @@ Complete independently before leaving. 5 minutes.
 | **SKILL.md** | Complete with CONSTRAINTS naming all 3 locked functions + API contract + security rules | CONSTRAINTS present but incomplete | No CONSTRAINTS section |
 | **Demo clarity** | Pipeline shown, blocked PR shown, eval scorecard presented | Feature demo + pipeline, no blocked PR example | Feature demo only |
 | **CoP entry** | Specific incident, correct root cause, prevention gate named, SKILL.md update decided | Incident described but root cause vague | No incident or only theoretical |
+
 
 **Maximum score: 24 points**
 
