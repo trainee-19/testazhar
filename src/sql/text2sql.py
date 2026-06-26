@@ -109,13 +109,32 @@ def _generate_sql_from_question(question: str) -> Optional[str]:
     # Pattern: "How many X" / "How many students" / "How full"
     if any(pattern in normalized for pattern in ["how many", "how many students", "count", "total"]):
         if "chess" in normalized or "chess club" in normalized:
-            return "SELECT name, max_participants, jsonb_array_length(participants) as current FROM activities WHERE name = %s"
+            sql = (
+                "SELECT name, max_participants, "
+                "jsonb_array_length(participants) as current "
+                "FROM activities WHERE name = %s"
+            )
+            return sql
         if "programming" in normalized:
-            return "SELECT name, max_participants, jsonb_array_length(participants) as current FROM activities WHERE name ILIKE %s"
+            sql = (
+                "SELECT name, max_participants, "
+                "jsonb_array_length(participants) as current "
+                "FROM activities WHERE name ILIKE %s"
+            )
+            return sql
         if "gym" in normalized:
-            return "SELECT name, max_participants, jsonb_array_length(participants) as current FROM activities WHERE name ILIKE %s"
+            sql = (
+                "SELECT name, max_participants, "
+                "jsonb_array_length(participants) as current "
+                "FROM activities WHERE name ILIKE %s"
+            )
+            return sql
         # Generic: count of all activities with openings
-        return "SELECT name, max_participants, jsonb_array_length(participants) as current FROM activities"
+        sql = (
+            "SELECT name, max_participants, "
+            "jsonb_array_length(participants) as current FROM activities"
+        )
+        return sql
 
     # Pattern: "Which activities" / "List all"
     if any(pattern in normalized for pattern in ["which activities", "list all", "what activities"]):
@@ -123,24 +142,38 @@ def _generate_sql_from_question(question: str) -> Optional[str]:
 
     # Pattern: "Tell me about X" / "What is X" / "Describe X"
     if any(pattern in normalized for pattern in ["tell me about", "what is", "describe", "about"]):
+        sql = (
+            "SELECT name, description, schedule, max_participants "
+            "FROM activities WHERE name ILIKE %s"
+        )
         if "chess" in normalized:
-            return "SELECT name, description, schedule, max_participants FROM activities WHERE name ILIKE %s"
+            return sql
         if "programming" in normalized:
-            return "SELECT name, description, schedule, max_participants FROM activities WHERE name ILIKE %s"
+            return sql
         if "gym" in normalized:
-            return "SELECT name, description, schedule, max_participants FROM activities WHERE name ILIKE %s"
+            return sql
         # Extract activity name and search
         words = normalized.split()
         for i, word in enumerate(words):
             if word in ["about", "is"]:
                 if i + 1 < len(words):
-                    activity_hint = " ".join(words[i + 1:])
-                    return "SELECT name, description, schedule, max_participants FROM activities WHERE name ILIKE %s"
+                    sql = (
+                        "SELECT name, description, schedule, "
+                        "max_participants FROM activities "
+                        "WHERE name ILIKE %s"
+                    )
+                    return sql
         return "SELECT name, description, schedule FROM activities"
 
     # Pattern: "How many spots" / "Spots available" / "Open spots"
     if any(pattern in normalized for pattern in ["spots", "available", "openings", "capacity"]):
-        return "SELECT name, max_participants, jsonb_array_length(participants) as current, max_participants - jsonb_array_length(participants) as available FROM activities"
+        sql = (
+            "SELECT name, max_participants, "
+            "jsonb_array_length(participants) as current, "
+            "max_participants - jsonb_array_length(participants) as available "
+            "FROM activities"
+        )
+        return sql
 
     # Default: return all activities
     return "SELECT name, description, schedule FROM activities"
