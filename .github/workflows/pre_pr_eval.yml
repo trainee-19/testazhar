@@ -1,6 +1,10 @@
 name: Pre-PR Pipeline
  
 on: [pull_request]
+
+permissions:
+  statuses: write
+  contents: read
  
 jobs:
   pipeline:
@@ -54,7 +58,7 @@ jobs:
           "
  
       - name: "Step 5 — Security scan"
-        uses: github/super-linter@v5
+        uses: super-linter/super-linter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_PYTHON_FLAKE8: true

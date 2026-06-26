@@ -69,9 +69,11 @@ def ask_page():
 # UAT-LOCKED: This route has passed UAT. DO NOT MODIFY.
 # ============================================================
 
+
 @app.get("/activities")
 def get_activities():
     return activities
+
 
 @app.get("/activities/{activity_name}")
 def get_activity(activity_name: str):
@@ -82,6 +84,8 @@ def get_activity(activity_name: str):
 # ============================================================
 # UAT-LOCKED: This route has passed UAT. DO NOT MODIFY.
 # ============================================================
+
+
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
     """Sign up a student for an activity"""
@@ -94,6 +98,7 @@ def signup_for_activity(activity_name: str, email: str):
     # Add student
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
+
 
 def classify_query(question: str) -> str:
     """Classify a question as either qualitative, quantitative, or unknown."""
@@ -116,6 +121,7 @@ def classify_query(question: str) -> str:
     if any(keyword in normalized for keyword in sql_keywords):
         return "text2sql"
     return "unknown"
+
 
 @app.post("/api/ask")
 async def ask(request: Request) -> JSONResponse:
