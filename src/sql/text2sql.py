@@ -277,7 +277,10 @@ def run_text2sql(question: str) -> Dict[str, Any]:
     sql = _generate_sql_from_question(question)
     if sql is None:
         return {
-            "answer": "I couldn't understand that question. Try asking about activity details or how many students are enrolled.",
+            "answer": (
+                "I couldn't understand that question. "
+                "Try asking about activity details or how many students are enrolled."
+            ),
             "source": "text2sql",
             "confidence": 0.0,
         }
