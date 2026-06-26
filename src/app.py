@@ -5,9 +5,9 @@ A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 import os
 from pathlib import Path
 
@@ -74,5 +74,101 @@ def signup_for_activity(activity_name: str, email: str):
     # Add student
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
+
+
+def classify_query(question: str) -> str:
+    """Classify a question as either qualitative, quantitative, or unknown."""
+    if not isinstance(question, str):
+        return "unknown"
+
+    normalized = question.strip().lower()
+    if any(keyword in normalized for keyword in ("what", "describe", "tell me about", "how does", "explain")):
+        return "rag"
+    if any(keyword in normalized for keyword in ("how many", "which", "list", "count", "total", "how much", "how full")):
+        return "text2sql"
+    return "unknown"
+
+
+def rag_search(question: str) -> dict[str, object]:
+    """Return a simple RAG-style response for qualitative questions."""
+    return {
+        "answer": f"I can help explain the activity context for: {question}",
+        "source": "rag",
+        "confidence": 0.9,
+    }
+
+
+def run_text2sql(question: str) -> dict[str, object]:
+    """Return a simple text-to-SQL-style response for quantitative questions."""
+    return {
+        "answer": f"I can help turn this into a query for: {question}",
+        "source": "text2sql",
+        "confidence": 0.9,
+    }
+
+
+@app.post("/api/ask")
+async def ask(request: Request) -> JSONResponse:
+    """Route user questions to either RAG or text-to-SQL helpers."""
+    try:
+        payload = await request.json()
+    except Exception:
+        return JSONResponse(status_code=400, content={
+            "answer": "Please provide a non-empty question.",
+            "source": "direct",
+            "confidence": 1.0,
+        })
+
+    if not isinstance(payload, dict):
+        return JSONResponse(status_code=400, content={
+            "answer": "Please provide a non-empty question.",
+            "source": "direct",
+            "confidence": 1.0,
+        })
+
+    question = payload.get("question")
+    if not isinstance(question, str) or not question.strip():
+        return JSONResponse(status_code=400, content={
+            "answer": "Please provide a non-empty question.",
+            "source": "direct",
+            "confidence": 1.0,
+        })
+
+    route = classify_query(question)
+    try:
+        if route == "rag":
+            return JSONResponse(status_code=200, content=rag_search(question))
+        if route == "text2sql":
+            return JSONResponse(status_code=200, content=run_text2sql(question))
+    except Exception:
+        return JSONResponse(status_code=500, content={
+            "answer": "I couldn't process that question right now.",
+            "source": "direct",
+            "confidence": 0.0,
+        })
+
+    return JSONResponse(status_code=200, content={
+        "answer": "I can only answer questions about activities. Try asking what an activity is about, or how many students have joined.",
+        "source": "direct",
+        "confidence": 1.0,
+    })
+    
+# Stubs — will be replaced with real implementations in Task B
+def rag_search(question: str) -> dict:
+    """Placeholder: returns stub RAG answer."""
+    return {
+        "answer": f"[RAG stub] Answer about: {question}",
+        "source": "rag",
+        "confidence": 0.0
+    }
+
+def run_text2sql(question: str) -> dict:
+    """Placeholder: returns stub Text2SQL answer."""
+    return {
+        "answer": f"[Text2SQL stub] Data answer for: {question}",
+        "source": "text2sql",
+        "confidence": 0.0
+    }
+
 
 

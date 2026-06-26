@@ -54,3 +54,56 @@ tests:
   assert:
   - type: contains
     value: "404"
+
+# Append to promptfooconfig.yaml
+
+# ── Capstone: /api/ask endpoint eval ─────────────────────────────────────
+- description: "Capstone: ask endpoint has correct function name"
+  assert:
+    - type: contains
+      value: "def ask"
+
+- description: "Capstone: ask endpoint uses correct route"
+  assert:
+    - type: contains
+      value: "/api/ask"
+
+- description: "Capstone: endpoint accepts POST method"
+  assert:
+    - type: contains
+      value: "POST"
+
+- description: "Capstone: classifier function present"
+  assert:
+    - type: contains
+      value: "classify_query"
+
+- description: "Capstone: RAG routing for qualitative queries"
+  assert:
+    - type: contains
+      value: "rag"
+
+- description: "Capstone: Text2SQL routing for quantitative queries"
+  assert:
+    - type: contains
+      value: "text2sql"
+
+- description: "Capstone: does NOT modify get_activities — UAT-locked"
+  assert:
+    - type: not-contains
+      value: "def get_activities"
+
+- description: "Capstone: does NOT modify signup — UAT-locked"
+  assert:
+    - type: not-contains
+      value: "def signup"
+
+- description: "Capstone: returns source field in response"
+  assert:
+    - type: contains
+      value: '"source"'
+
+- description: "Capstone: handles 400 for missing question field"
+  assert:
+    - type: contains
+      value: "400"

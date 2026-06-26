@@ -342,7 +342,7 @@ ask() route present?         □ Yes         □ No — re-prompt
 ```bash
 pytest src/tests/test_app.py -v
 ```
-
+![alt text](image.png)
 ```
 All 8 original tests pass?   □ Yes — commit   □ No — investigate
 ```
