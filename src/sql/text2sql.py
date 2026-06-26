@@ -295,7 +295,14 @@ def run_text2sql(question: str) -> Dict[str, Any]:
     if "%s" in sql:
         # Simple heuristic: if question mentions a specific activity, use it
         normalized = question.lower()
-        for activity in ["chess club", "chess", "programming class", "programming", "gym class", "gym"]:
+        for activity in [
+            "chess club",
+            "chess",
+            "programming class",
+            "programming",
+            "gym class",
+            "gym",
+        ]:
             if activity in normalized:
                 params.append(f"%{activity}%")
                 break
