@@ -1,109 +1,88 @@
 # promptfooconfig.yml
 prompts:
-- |
-  Add a new Flask route function called get_activity_count to src/app.py.
-
-  Task: Implement GET /activities/<string:activity_name>/count that returns
-  {"activity": name, "participant_count": N} with HTTP 200, or
-  {"error": "Activity not found"} with HTTP 404 if not found.
-
-  Scope: Add this function BELOW remove_signup(). Do NOT modify
-  get_activities(), signup(), or remove_signup(). Do NOT touch
-  src/tests/test_app.py or src/static/.
-
-  Constraint: Use jsonify() for all responses. Return HTTP 200 or 404 only.
-  Do not add new import statements. Do not change the ACTIVITIES dictionary.
-
-  Format: Single function named get_activity_count with a one-line docstring.
+  - |
+    Add a new FastAPI route function called get_activity to src/app.py.
+    Return the activity details as a JSON object (200) or raise
+    HTTPException(status_code=404, detail="Activity not found").
+    Place the new route below signup_for_activity(). Use existing imports only;
+    do not add new imports. Output only the new route + function.
 
 providers:
-- openai:gpt-5-mini
+  - file://provider.js
 
 tests:
-- description: "Output contains the correct function name"
-  assert:
-  - type: contains
-    value: "def get_activity_count"
 
-- description: "Output uses the correct route path"
-  assert:
-  - type: contains
-    value: "/count"
+  - description: "Output contains the correct function name"
+    assert:
+      - type: contains
+        value: "def get_activity"
 
-- description: "Output does NOT modify get_activities — UAT-locked"
-  assert:
-  - type: not-contains
-    value: "def get_activities"
+  - description: "Output does NOT contain modification of get_activities"
+    assert:
+      - type: not-contains
+        value: "def get_activities"
 
-- description: "Output does NOT modify signup — UAT-locked"
-  assert:
-  - type: not-contains
-    value: "def signup"
+  - description: "Output does NOT include the existing signup route"
+    assert:
+      - type: not-contains
+        value: "def signup_for_activity"
+  - description: "Output uses jsonify"
+    assert:
+      - type: contains
+        value: "JSONResponse"
 
-- description: "Output does NOT modify remove_signup — UAT-locked"
-  assert:
-  - type: not-contains
-    value: "def remove_signup"
+  - description: "Output uses 404 status for not found"
+    assert:
+      - type: contains
+        value: "status_code=404"
 
-- description: "Output uses jsonify"
-  assert:
-  - type: contains
-    value: "jsonify"
 
-- description: "Output returns 404 for not-found activities"
-  assert:
-  - type: contains
-    value: "404"
+  - description: "Capstone: ask endpoint has correct function name"
+    assert:
+      - type: contains
+        value: "def ask"
 
-# Append to promptfooconfig.yaml
+  - description: "Capstone: ask endpoint uses correct route"
+    assert:
+      - type: contains
+        value: "/api/ask"
 
-# ── Capstone: /api/ask endpoint eval ─────────────────────────────────────
-- description: "Capstone: ask endpoint has correct function name"
-  assert:
-    - type: contains
-      value: "def ask"
+  - description: "Capstone: endpoint accepts POST method"
+    assert:
+      - type: contains
+        value: "POST"
 
-- description: "Capstone: ask endpoint uses correct route"
-  assert:
-    - type: contains
-      value: "/api/ask"
+  - description: "Capstone: classifier function present"
+    assert:
+      - type: contains
+        value: "classify_query"
 
-- description: "Capstone: endpoint accepts POST method"
-  assert:
-    - type: contains
-      value: "POST"
+  - description: "Capstone: RAG routing for qualitative queries"
+    assert:
+      - type: contains
+        value: "rag"
 
-- description: "Capstone: classifier function present"
-  assert:
-    - type: contains
-      value: "classify_query"
+  - description: "Capstone: Text2SQL routing for quantitative queries"
+    assert:
+      - type: contains
+        value: "text2sql"
 
-- description: "Capstone: RAG routing for qualitative queries"
-  assert:
-    - type: contains
-      value: "rag"
+  - description: "Capstone: does NOT modify get_activities — UAT-locked"
+    assert:
+      - type: not-contains
+        value: "def get_activities"
 
-- description: "Capstone: Text2SQL routing for quantitative queries"
-  assert:
-    - type: contains
-      value: "text2sql"
+  - description: "Capstone: does NOT modify signup — UAT-locked"
+    assert:
+      - type: not-contains
+        value: "def signup"
 
-- description: "Capstone: does NOT modify get_activities — UAT-locked"
-  assert:
-    - type: not-contains
-      value: "def get_activities"
+  - description: "Capstone: returns source field in response"
+    assert:
+      - type: contains
+        value: '"source"'
 
-- description: "Capstone: does NOT modify signup — UAT-locked"
-  assert:
-    - type: not-contains
-      value: "def signup"
-
-- description: "Capstone: returns source field in response"
-  assert:
-    - type: contains
-      value: '"source"'
-
-- description: "Capstone: handles 400 for missing question field"
-  assert:
-    - type: contains
-      value: "400"
+  - description: "Capstone: handles 400 for missing question field"
+    assert:
+      - type: contains
+        value: "400"

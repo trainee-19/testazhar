@@ -703,7 +703,7 @@ git push
 ```bash
 npx promptfoo eval
 ```
-
+![alt text](image-5.png)
 ```
 Total assertions: ______
 Passed: ______
